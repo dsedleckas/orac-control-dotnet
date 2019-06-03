@@ -1,4 +1,4 @@
-
+![](https://raw.githubusercontent.com/dsedleckas/orac-control-dotnet/master/surface-screenshot.png)
 # Osc Client application for ORAC 2.0
 Osc Client for the virtual modular synth ORAC: https://github.com/TheTechnobear/Orac. Further description assumes some knowledge and experience with ORAC.
 
