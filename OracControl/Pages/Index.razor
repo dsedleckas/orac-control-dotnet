@@ -1,0 +1,112 @@
+﻿@page "/"
+@using OracControl.Components;
+@using OracControl.Services;
+@using  Microsoft.Extensions.Configuration;
+@inject IJSRuntime JSRuntime
+@inject IOscServer server
+@inject IConfiguration config
+
+@implements IDisposable
+
+
+    <div class="row">
+        <div class="col-sm-8">
+            <div class="@(IsLoaded ? "d-none" :"")">
+                Please connect!
+            </div>
+            <div class="@(!IsLoaded ? "d-none" :"d-flex") flex-row flex-grow-1 align-items-stretch">
+                <div class="card flex-grow-1">
+                    <div class="card-header">
+                        <OracModuleControl />
+                    </div>
+                    <div class="card-body">
+                        <div class="card">
+                            <div class="card-header">
+                                <OracPageControl />
+                            </div>
+                            <div class="card-body">
+                                <div class="container">
+                                    <div class="row">
+                                        <div class="col-sm">
+                                            <OracParameterControl Prefix="/P1" />
+                                        </div>
+                                        <div class="col-sm">
+                                            <OracParameterControl Prefix="/P2" />
+                                        </div>
+                                        <div class="col-sm">
+                                            <OracParameterControl Prefix="/P3" />
+                                        </div>
+                                        <div class="col-sm">
+                                            <OracParameterControl Prefix="/P4" />
+                                        </div>
+                                    </div>
+                                    <div class="row">
+                                        <div class="col-sm">
+                                            <OracParameterControl Prefix="/P5" />
+                                        </div>
+                                        <div class="col-sm">
+                                            <OracParameterControl Prefix="/P6" />
+                                        </div>
+                                        <div class="col-sm">
+                                            <OracParameterControl Prefix="/P7" />
+                                        </div>
+                                        <div class="col-sm">
+                                            <OracParameterControl Prefix="/P8" />
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <OracMenuControl />
+    </div>
+
+@functions {
+
+    public bool IsLoaded { get; set; } = false;
+    protected override async Task OnAfterRenderAsync()
+    {
+        await JSRuntime.InvokeAsync<object>(
+                "keyboard.init",
+                new DotNetObjectRef(this));
+    }
+
+    public void OnMessageReceived(object sender, OscMessage msg)
+    {
+        if (!IsLoaded && msg.Address == "/ConnectComplete")
+        {
+            IsLoaded = true;
+            base.Invoke(StateHasChanged);
+        }
+    }
+
+    private Dictionary<string, string> KeyMappings { get; set; }
+
+    protected override void OnInit()
+    {
+        KeyMappings = config.GetSection("KeyboardMappings").GetChildren()
+            .Select(item => new KeyValuePair<string, string>(item.Key, item.Value))
+            .ToDictionary(x => x.Key, x => x.Value);
+
+        server.OscMessageArrived += OnMessageReceived;
+    }
+
+    public void Dispose()
+    {
+        server.OscMessageArrived -= OnMessageReceived;
+    }
+
+    [JSInvokable]
+    public Task OnKeyDown(string keyCode)
+    {
+        if(KeyMappings.TryGetValue(keyCode, out var address))
+        {
+            server.Send(address, 1);
+        }
+
+        return Task.CompletedTask;
+    }
+}

@@ -1,0 +1,8 @@
+{
+  "profiles": {
+    "OracControl": {
+      "commandName": "Project",
+      "applicationUrl": "http://localhost:5000",
+    }
+  }
+}

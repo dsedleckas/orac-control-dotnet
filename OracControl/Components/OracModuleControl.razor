@@ -1,0 +1,66 @@
+﻿@using OracControl.Services;
+@using  Microsoft.Extensions.Configuration;
+@inject IOscServer server
+@inject IConfiguration config
+@implements IDisposable
+
+    <div class="d-flex flex-row justify-content-between">
+        <div>
+            <button onclick="@(() => PageChange(PrevPageAddress))" class="ml-2 btn btn-outline-secondary @(!config.GetValue<bool>("EnableOnScreenNavigationButtons") ? "d-none" : "")" type="button">Previous</button>
+        </div>
+        <div class="navbar-brand">
+            <p class="d-inline font-weight-light text-lowercase" style="font-size:small;">
+                Slot
+            </p>
+            <p class="d-inline font-weight-bold mr-2">
+                @Slot
+            </p>
+            <p class="d-inline font-weight-light text-lowercase" style="font-size:small;">
+                module
+            </p>
+            <p class="d-inline font-weight-bold">
+                @Name
+            </p>
+        </div>        
+        <div>
+            <button onclick="@(() => PageChange(NextPageAddress))" class="ml-2 btn btn-outline-secondary @(!config.GetValue<bool>("EnableOnScreenNavigationButtons") ? "d-none" : "")" type="button">Next</button>
+        </div>
+    </div>
+
+@functions {
+    public string Name { get; set; } = "Unknown";
+
+    public string Slot { get; set; } = "Unknown";
+
+    public string OscReceiveAddress { get; set; }
+
+    public string NextPageAddress { get; set; } = "/ModuleNext";
+
+    public string PrevPageAddress { get; set; } = "/ModulePrev";
+
+    private void PageChange(string address)
+    {
+        server.Send(address, 1);
+    }
+
+    public void OnMessageReceived(object sender, OscMessage msg)
+    {
+        if (msg.Address == "/module")
+        {
+            var mseg = ((string)msg.Arg[0]).Split(':').Select(_ => _.TrimStart().TrimEnd()).ToArray();
+            Slot = mseg[0]?.ToUpper() ?? "Unknown";
+            Name = mseg[1];
+            base.Invoke(StateHasChanged);
+        }
+    }
+
+    protected override void OnInit()
+    {
+        server.OscMessageArrived += OnMessageReceived;
+    }
+
+    public void Dispose()
+    {
+        server.OscMessageArrived -= OnMessageReceived;
+    }
+}

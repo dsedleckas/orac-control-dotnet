@@ -1,0 +1,68 @@
+﻿@using Microsoft.AspNetCore.Components
+@using OracControl.Services;
+@using Microsoft.Extensions.Configuration;
+@inject IOscServer server
+@inject IConfiguration  config
+@implements IDisposable
+
+<div class="col-sm-4 @(!IsLoaded ? "d-none" : "")">
+    <div class="card flex-grow-1">
+        <div class="card-header d-flex flex-row justify-content-between">
+            <div class="navbar-brand font-weight-bold mr-0">
+                Menu
+            </div>
+            <div class="@(config.GetValue<bool>("EnableOnScreenNavigationButtons") ? "d-inline" : "d-none")">
+                <button onclick="@(() => Navigation("/NavPrev"))" class="btn btn-outline-secondary" type="button">Up</button>
+                <button onclick="@(() => Navigation("/NavNext"))" class="btn btn-outline-secondary" type="button">Down</button>
+                <button onclick="@(() => Navigation("/NavActivate"))" class="btn btn-outline-secondary" type="button">Enter</button>
+            </div>
+        </div>
+        <div class="card-body p-0">
+            <ul class="list-group list-group-flush ">
+                <OracMenuItem Idx="1" />
+                <OracMenuItem Idx="2" />
+                <OracMenuItem Idx="3" />
+                <OracMenuItem Idx="4" />
+                <OracMenuItem Idx="5" />
+            </ul>
+
+
+        </div>
+    </div>
+</div>
+
+@functions {
+    public bool IsLoaded { get; set; } = false;
+
+    private void Navigation(string address)
+    {
+        server.Send(address, 1);
+    }
+
+    public void OnMessageReceived(object sender, OscMessage msg)
+    {
+
+        //if (msg.Address == "/clearText" && !Loading)
+        //{
+        //    Loading = true;
+        //    base.Invoke(StateHasChanged);
+        //}
+        if (!IsLoaded && msg.Address == "/ConnectComplete")
+        {
+            IsLoaded = true;
+            base.Invoke(StateHasChanged);
+        }
+    }
+
+    protected override void OnInit()
+    {
+        server.OscMessageArrived += OnMessageReceived;
+    }
+
+    public void Dispose()
+    {
+        server.OscMessageArrived -= OnMessageReceived;
+    }
+}
+
+

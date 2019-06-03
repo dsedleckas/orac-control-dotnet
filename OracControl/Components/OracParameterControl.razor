@@ -1,0 +1,79 @@
+﻿@using Microsoft.AspNetCore.Components
+@using OracControl.Services;
+@using OracControl.Pages;
+@inject IOscServer server
+@implements IDisposable
+
+    <div class="@DisplayStatus flex-column justify-content-center align-items-center border">
+        <div class="d-block d-flex flex-row justify-content-between pb-2" style="width:100%;">
+            <div class="d-inline text-right pl-2">@Description</div>
+            <div class="d-inline text-left pl-1">@Value</div>
+        </div>
+        <PieControl Size="70" OscAddressReceive="@(Prefix + "Ctrl")" OscAddressSend="@(Prefix + "Ctrl")" />
+    </div>
+
+@functions {
+    [Parameter] public string Prefix { get; set; }
+
+    public string Value { get; set; }
+
+    public string Description { get; set; }
+
+    public string DisplayStatus { get; set; } = "d-none";
+
+    public void OnMessageReceived(object sender, OscMessage msg)
+    {
+        //if (msg.Address == $"{Prefix}Ctrl")
+        //{
+
+        //}
+
+        if (msg.Address == $"{Prefix}Value")
+        {
+            Value = (string)msg.Arg[0];
+            if (string.IsNullOrEmpty(Value))
+            {
+                Disable();
+            }
+            else
+            {
+                Enable();
+            }
+            base.Invoke(StateHasChanged);
+        }
+
+        if (msg.Address == $"{Prefix}Desc")
+        {
+            Description = (string)msg.Arg[0];
+            if (string.IsNullOrEmpty(Description))
+            {
+                Disable();
+            }
+            else
+            {
+                Enable();
+            }
+            base.Invoke(StateHasChanged);
+        }
+    }
+
+    public void Dispose()
+    {
+        server.OscMessageArrived -= OnMessageReceived;
+    }
+
+    private void Disable()
+    {
+        DisplayStatus = "d-none";
+    }
+
+    private void Enable()
+    {
+        DisplayStatus = "d-block d-flex";
+    }
+
+    protected override void OnInit()
+    {
+        server.OscMessageArrived += OnMessageReceived;
+    }
+}

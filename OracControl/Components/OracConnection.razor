@@ -1,0 +1,91 @@
+﻿@using Microsoft.Extensions.Configuration
+@using OracControl.Services;
+@using System.Net;
+
+@implements IDisposable
+@inject IOscServer server
+@inject IConfiguration config
+
+    <div class="form-inline">
+        <div class="input-group">
+            <div class="input-group-prepend">
+                <span class="input-group-text">ORAC</span>
+            </div>
+            <input bind="OracIp" placeholder="Ip" type="text" aria-label="IP" class="form-control" style="width: 130px;" />
+            <input bind="OracPort" placeholder="Port" type="text" aria-label="Port" class="form-control" style="width: 80px;" />
+        </div>
+
+        <div class="input-group ml-2">
+            <div class="input-group-prepend">
+                <span class="input-group-text">Listener</span>
+            </div>
+            <input bind="ListenPort" placeholder="Port" type="text" aria-label="Port" class="form-control" style="width: 80px;" />
+        </div>
+
+        <button onclick="@OnClick" class="ml-2 btn @ConnectActionState" type="button">Connect</button>
+        <div class="ml-3 d-inline spinner-grow @UIStatus" role="status">
+            <span class="sr-only">Sender status</span>
+        </div>
+    </div>
+
+
+@functions {
+    public string OracIp { get; set; }
+
+    public string OracPort { get; set; }
+
+    public string ListenPort { get; set; }
+
+    public string ConnectActionState { get; set; } = "btn-outline-secondary";
+
+    public string UIStatus { get; set; } = "text-secondary";
+
+    private void OnClick()
+    {
+        if (int.TryParse(OracPort, out var oracPort) && int.TryParse(ListenPort, out var listenPort) && IPAddress.TryParse(OracIp, out var oracIp))
+        {
+            ConnectActionState = "btn-outline-secondary";
+            server.Reconnect(oracIp, oracPort, listenPort);
+        }
+        else
+        {
+            ConnectActionState = "btn-outline-danger";
+        }
+    }
+
+    private void OnServerStateChange(object sender, ServerStateChanged stateChange)
+    {
+        UIStatus = StateToUiText(stateChange.ListenerState, stateChange.SenderState);
+        base.Invoke(StateHasChanged);
+    }
+
+    private string StateToUiText(Rug.Osc.OscSocketState? listenerState, Rug.Osc.OscSocketState? senderState)
+    {
+        if (listenerState == Rug.Osc.OscSocketState.Connected &&
+            senderState == Rug.Osc.OscSocketState.Connected)
+        {
+            return "text-success";
+
+        }
+        else if (listenerState == null && senderState == null)
+        {
+            return "text-secondary";
+        }
+
+        return "text-danger";
+    }
+
+    protected override void OnInit()
+    {
+        OracIp = config.GetValue<string>("DefaultOracIp");
+        OracPort = config.GetValue<string>("DefaultOracPort");
+        ListenPort = config.GetValue<string>("DefaultListenPort");
+        server.ServerStateChanged += OnServerStateChange;
+        base.OnInit();
+    }
+
+    public void Dispose()
+    {
+        server.ServerStateChanged -= OnServerStateChange;
+    }
+}

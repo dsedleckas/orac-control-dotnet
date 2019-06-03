@@ -1,0 +1,71 @@
+﻿@using Microsoft.AspNetCore.Components
+@using OracControl.Services;
+@inject IOscServer server
+@implements IDisposable
+
+<li class="list-group-item @(Active ? "active" : "") @(Toggle ? "font-weight-bold" : "")" style="min-height:48px;">@Label</li>
+
+@functions {
+    [Parameter] public int Idx { get; set; }
+
+    public string Label { get; set; } = " ";
+
+    public bool Toggle { get; set; }
+
+    public bool Active { get; set; }
+
+    public void OnMessageReceived(object sender, OscMessage msg)
+    {
+        if (msg.Address == "/clearText")
+        {
+            if (Label != " ")
+            {
+                Label = " ";
+                base.Invoke(StateHasChanged);
+            }
+        }
+        else if (msg.Address == "/text")
+        {
+            var idx = (int)msg.Arg[0];
+
+            if (idx == Idx)
+            {
+                var label = (string)msg.Arg[1];
+                if (label.Contains("[X]"))
+                {
+                    Toggle = true;
+                }
+                else
+                {
+                    Toggle = false;
+                }
+
+                Label = label.Split("   ", StringSplitOptions.RemoveEmptyEntries).FirstOrDefault() ?? " ";
+                base.Invoke(StateHasChanged);
+            }
+
+        }
+
+        if (msg.Address == "/selectText")
+        {
+            var idx = (int)msg.Arg[0];
+            if (Active != (idx == Idx))
+            {
+                Active = idx == Idx;
+                base.Invoke(StateHasChanged);
+            }
+        }
+    }
+
+    protected override void OnInit()
+    {
+        server.OscMessageArrived += OnMessageReceived;
+    }
+
+    public void Dispose()
+    {
+        server.OscMessageArrived -= OnMessageReceived;
+    }
+}
+
+

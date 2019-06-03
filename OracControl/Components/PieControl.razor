@@ -1,0 +1,74 @@
+﻿@using Microsoft.AspNetCore.Components
+@using OracControl.Services
+@inject IOscServer server
+@inject IComponentContext ComponentContext
+
+@inject IJSRuntime JSRuntime
+@implements IDisposable
+
+<div class="noselect" style="display: inline-block; " id="@GetId"></div>
+
+@functions {
+    [Parameter] int Size { get; set; }
+
+    [Parameter] string OscAddressReceive { get; set; }
+
+    [Parameter] string OscAddressSend { get; set; }
+
+    private string GetId => $"ctrl{GetHashCode()}";
+
+    protected override void OnInit()
+    {
+        server.OscMessageArrived += OscMessageArrived;
+    }
+
+    [JSInvokable]
+    public Task UpdateValue(double value)
+    {
+        if (OscAddressSend != null)
+        {
+            server.Send(OscAddressSend, (float)value);
+        }
+        return Task.CompletedTask;
+    }
+
+    protected override bool ShouldRender()
+    {
+        return false;
+    }
+
+    protected override async Task OnAfterRenderAsync()
+    {
+        await JSRuntime.InvokeAsync<object>(
+                "pieControls.init",
+                new DotNetObjectRef(this),
+                GetId,
+                Size);
+    }
+
+    public void Dispose()
+    {
+        server.OscMessageArrived -= OscMessageArrived;
+    }
+
+    private async void OscMessageArrived(object sender, OscMessage message)
+    {
+        if (message.Address == OscAddressReceive)
+        {
+            try
+            {
+                if (ComponentContext.IsConnected)
+                {
+                    await JSRuntime.InvokeAsync<object>(
+                    "pieControls.updateValue",
+                    GetId,
+                    (float)message.Arg[0]);
+                }
+            }
+            catch (Exception e)
+            {
+                Console.WriteLine($"Error updating value, {e.Message}");
+            }
+        }
+    }
+}
