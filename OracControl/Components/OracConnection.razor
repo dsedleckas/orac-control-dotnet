@@ -6,26 +6,32 @@
 @inject IOscServer server
 @inject IConfiguration config
 
+    
     <div class="form-inline">
-        <div class="input-group">
+        <div class="text-center w-100 mb-3">
+            <h1 class="font-weight-bold">ORAC 2.0</h1>
+        </div>
+        <div class="input-group mb-3 mx-2">
             <div class="input-group-prepend">
-                <span class="input-group-text">ORAC</span>
+                <span class="input-group-text">IP</span>
             </div>
             <input bind="OracIp" placeholder="Ip" type="text" aria-label="IP" class="form-control" style="width: 130px;" />
             <input bind="OracPort" placeholder="Port" type="text" aria-label="Port" class="form-control" style="width: 80px;" />
         </div>
 
-        <div class="input-group ml-2">
+        <div class="input-group mb-3 mx-2">
             <div class="input-group-prepend">
                 <span class="input-group-text">Listener</span>
             </div>
             <input bind="ListenPort" placeholder="Port" type="text" aria-label="Port" class="form-control" style="width: 80px;" />
         </div>
 
-        <button onclick="@OnClick" class="ml-2 btn @ConnectActionState" type="button">Connect</button>
-        <div class="ml-3 d-inline spinner-grow @UIStatus" role="status">
-            <span class="sr-only">Sender status</span>
-        </div>
+        <button onclick="@OnClick" class="btn btn-block mb-3 mx-2 @ConnectActionState" type="button">
+            <span>Connect</span>
+            <div class="spinner-grow @UIStatus" role="status">
+                <span class="sr-only">Sender status</span>
+            </div>
+        </button>
     </div>
 
 

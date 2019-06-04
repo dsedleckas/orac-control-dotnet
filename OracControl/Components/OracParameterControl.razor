@@ -4,7 +4,7 @@
 @inject IOscServer server
 @implements IDisposable
 
-    <div class="@DisplayStatus flex-column justify-content-center align-items-center border">
+    <div class="@DisplayStatus flex-column justify-content-center align-items-center">
         <div class="d-block d-flex flex-row justify-content-between pb-2" style="width:100%;">
             <div class="d-inline text-right pl-2">@Description</div>
             <div class="d-inline text-left pl-1">@Value</div>
@@ -23,10 +23,6 @@
 
     public void OnMessageReceived(object sender, OscMessage msg)
     {
-        //if (msg.Address == $"{Prefix}Ctrl")
-        //{
-
-        //}
 
         if (msg.Address == $"{Prefix}Value")
         {

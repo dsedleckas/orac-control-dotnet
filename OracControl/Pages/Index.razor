@@ -9,59 +9,45 @@
 @implements IDisposable
 
 
-    <div class="row">
-        <div class="col-sm-8">
-            <div class="@(IsLoaded ? "d-none" :"")">
-                Please connect!
+    <div class="main">
+        <div class="container container-centered @(IsLoaded ? "d-none" : "")">
+            <OracConnection />
+        </div>
+        <div class="card @(!IsLoaded ? "d-none" :"")">
+            <div class="card-header">
+                <OracModuleControl />
             </div>
-            <div class="@(!IsLoaded ? "d-none" :"d-flex") flex-row flex-grow-1 align-items-stretch">
-                <div class="card flex-grow-1">
-                    <div class="card-header">
-                        <OracModuleControl />
+            <div class="card-body">
+                <div class="row">
+                    <div class="col-6 col-md-3">
+                        <OracParameterControl Prefix="/P1" />
                     </div>
-                    <div class="card-body">
-                        <div class="card">
-                            <div class="card-header">
-                                <OracPageControl />
-                            </div>
-                            <div class="card-body">
-                                <div class="container">
-                                    <div class="row">
-                                        <div class="col-sm">
-                                            <OracParameterControl Prefix="/P1" />
-                                        </div>
-                                        <div class="col-sm">
-                                            <OracParameterControl Prefix="/P2" />
-                                        </div>
-                                        <div class="col-sm">
-                                            <OracParameterControl Prefix="/P3" />
-                                        </div>
-                                        <div class="col-sm">
-                                            <OracParameterControl Prefix="/P4" />
-                                        </div>
-                                    </div>
-                                    <div class="row">
-                                        <div class="col-sm">
-                                            <OracParameterControl Prefix="/P5" />
-                                        </div>
-                                        <div class="col-sm">
-                                            <OracParameterControl Prefix="/P6" />
-                                        </div>
-                                        <div class="col-sm">
-                                            <OracParameterControl Prefix="/P7" />
-                                        </div>
-                                        <div class="col-sm">
-                                            <OracParameterControl Prefix="/P8" />
-                                        </div>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
+                    <div class="col-6 col-md-3">
+                        <OracParameterControl Prefix="/P2" />
+                    </div>
+                    <div class="col-6 col-md-3">
+                        <OracParameterControl Prefix="/P3" />
+                    </div>
+                    <div class="col-6 col-md-3">
+                        <OracParameterControl Prefix="/P4" />
+                    </div>
+                </div>
+                <div class="row">
+                    <div class="col-6 col-md-3">
+                        <OracParameterControl Prefix="/P5" />
+                    </div>
+                    <div class="col-6 col-md-3">
+                        <OracParameterControl Prefix="/P6" />
+                    </div>
+                    <div class="col-6 col-md-3">
+                        <OracParameterControl Prefix="/P7" />
+                    </div>
+                    <div class="col-6 col-md-3">
+                        <OracParameterControl Prefix="/P8" />
                     </div>
                 </div>
             </div>
         </div>
-        <OracMenuControl />
     </div>
 
 @functions {
