@@ -5,20 +5,19 @@
 <!DOCTYPE html>
 <html>
 <head>
-    <meta charset="utf-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta charset="utf-8"/>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=0">
     <title>Orac 2.0 Control</title>
     <base href="~/" />
     <link rel="stylesheet" href="css/bootstrap/bootstrap.min.css" />
     <link href="css/site.css" rel="stylesheet" />
-    <link href="~/css/bootstrap-overrides.css" rel="stylesheet" />
     <script src="https://d3js.org/d3.v4.min.js"></script>
     <script src="~/keyboard.js"></script>
     <script src="~/d3PieChart.js"></script>
     <script src="~/svgGrid.js"></script>
 </head>
 <body>
-    <app class="fill">@(await Html.RenderComponentAsync<App>())</app>
+    <app>@(await Html.RenderComponentAsync<App>())</app>
 
     <script src="_framework/blazor.server.js"></script>
 </body>

@@ -4,39 +4,54 @@
 @inject IConfiguration config
 @implements IDisposable
 
-    <div class="d-flex flex-row justify-content-between">
-        <div>
-            <button onclick="@(() => PageChange(PrevPageAddress))" class="ml-2 btn btn-outline-secondary @(!config.GetValue<bool>("EnableOnScreenNavigationButtons") ? "d-none" : "")" type="button">Previous</button>
+    <div class="d-flex justify-content-between flex-wrap">
+        <div class="p-1 btn-group @(!config.GetValue<bool>("EnableOnScreenNavigationButtons") ? "d-none" : "")" role="group">
+            <button onclick="@(() => ModuleChange(PrevModuleAddress))" class="btn btn-outline-secondary" type="button">◄</button>
+            <button class="btn btn-outline-secondary" style="width:140px;" type="button">@(ModuleSlot): @(ModuleName)</button>
+            <button onclick="@(() => ModuleChange(NextModuleAddress))" class="btn btn-outline-secondary" type="button">►</button>
+        </div>      
+        <div class="p-1 btn-group @(!config.GetValue<bool>("EnableOnScreenNavigationButtons") ? "d-none" : "")" role="group">
+            <button onclick="@(() => PageChange(PrevPageAddress))" class="btn btn-outline-secondary" type="button">◄</button>
+            <button class="btn btn-outline-secondary" style="width:140px;" type="button">@(PageName)</button>
+            <button onclick="@(() => PageChange(NextPageAddress))" class="btn btn-outline-secondary" type="button">►</button>
         </div>
-        <div class="navbar-brand">
-            <p class="d-inline font-weight-light text-lowercase" style="font-size:small;">
-                Slot
-            </p>
-            <p class="d-inline font-weight-bold mr-2">
-                @Slot
-            </p>
-            <p class="d-inline font-weight-light text-lowercase" style="font-size:small;">
-                module
-            </p>
-            <p class="d-inline font-weight-bold">
-                @Name
-            </p>
-        </div>        
-        <div>
-            <button onclick="@(() => PageChange(NextPageAddress))" class="ml-2 btn btn-outline-secondary @(!config.GetValue<bool>("EnableOnScreenNavigationButtons") ? "d-none" : "")" type="button">Next</button>
-        </div>
+        <div class="p-1 modal-container">
+            <input id="modal-toggle" type="checkbox">
+            <label class="btn btn-outline-secondary" style="margin-bottom:0;cursor:pointer;" for="modal-toggle">Menu</label> 
+            <label class="modal-backdrop" for="modal-toggle"></label>
+            <div class="modal-content" style="border:none;">
+                <label class="modal-close" style="display:none;" for="modal-toggle">&#x2715;</label>
+                <OracMenuControl /> 
+            </div>          
+        </div>  
     </div>
 
 @functions {
-    public string Name { get; set; } = "Unknown";
+    public string ModuleSlot { get; set; } = "Unknown";
 
-    public string Slot { get; set; } = "Unknown";
+    public string ModuleName { get; set; } = "Unknown";
 
     public string OscReceiveAddress { get; set; }
 
-    public string NextPageAddress { get; set; } = "/ModuleNext";
+    public string NextModuleAddress { get; set; } = "/ModuleNext";
 
-    public string PrevPageAddress { get; set; } = "/ModulePrev";
+    public string PrevModuleAddress { get; set; } = "/ModulePrev";
+
+    public string PageName { get; set; } = "Empty";
+
+    public string NextPageAddress { get; set; } = "/PageNext";
+
+    public string PrevPageAddress { get; set; } = "/PagePrev";
+
+    public void HandleKeyPress(UIKeyboardEventArgs ev)
+    {
+        Console.WriteLine(ev.Key, ev.ShiftKey);
+    }
+
+    private void ModuleChange(string address)
+    {
+        server.Send(address, 1);
+    }
 
     private void PageChange(string address)
     {
@@ -45,12 +60,24 @@
 
     public void OnMessageReceived(object sender, OscMessage msg)
     {
-        if (msg.Address == "/module")
+        if (msg.Address == "/module") 
         {
             var mseg = ((string)msg.Arg[0]).Split(':').Select(_ => _.TrimStart().TrimEnd()).ToArray();
-            Slot = mseg[0]?.ToUpper() ?? "Unknown";
-            Name = mseg[1];
+            ModuleSlot = mseg[0]?.ToUpper() ?? "Unknown";
+            ModuleName = mseg[1];
             base.Invoke(StateHasChanged);
+        }
+        else if (msg.Address == "/page") 
+        {
+            var name = (string)msg.Arg[0];
+            if (string.IsNullOrWhiteSpace(name)) {
+                name = "Empty";
+            }
+
+            if (PageName != name) {
+                PageName = name;
+                base.Invoke(StateHasChanged);
+            }
         }
     }
 
@@ -63,4 +90,5 @@
     {
         server.OscMessageArrived -= OnMessageReceived;
     }
+
 }
