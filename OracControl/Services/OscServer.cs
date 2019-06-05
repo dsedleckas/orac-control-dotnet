@@ -7,7 +7,7 @@ namespace OracControl.Services
 {
     public class OscServer : IDisposable, IOscServer
     {
-        private volatile OscSender _sender;
+        private volatile UDPSender _sender;
         private volatile bool _moduleLoaded = false;
         private volatile bool _menuLoaded = false;
         private volatile OscReceiver _receiver;
@@ -63,16 +63,8 @@ namespace OracControl.Services
                 SendServerState();
             }
 
-            SendServerState();
-            if (_sender?.State == OscSocketState.Connected)
-            {
-                _sender.Close();
-                SendServerState();
-            }
-            _sender?.Dispose();
-            _sender = new OscSender(address, port);
-            SendServerState();
-            _sender.Connect();
+            _sender?.Close();
+            _sender = new UDPSender(address, port);
             SendServerState();
             _moduleLoaded = false;
             _menuLoaded = false;
@@ -89,7 +81,7 @@ namespace OracControl.Services
             {
                 var msg = new Rug.Osc.OscMessage(address, args);
                 //Console.WriteLine($"Sending: {msg.ToString()}");
-                _sender.Send(msg);
+                _sender.Send(msg.ToByteArray());
             }
             catch (Exception e)
             {
@@ -169,7 +161,7 @@ namespace OracControl.Services
                 new Services.ServerStateChanged
                 {
                     ListenerState = _receiver?.State,
-                    SenderState = _sender?.State
+                    SenderState = null
                 });
         }
     }
