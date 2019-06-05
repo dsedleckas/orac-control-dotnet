@@ -16,17 +16,33 @@
             <button onclick="@(() => PageChange(NextPageAddress))" class="btn btn-outline-secondary" type="button">►</button>
         </div>
         <div class="p-1 modal-container">
-            <input id="modal-toggle" type="checkbox">
+            <input id="modal-toggle" type="checkbox" bind="@ShowMenu" />
             <label class="btn btn-outline-secondary" style="margin-bottom:0;cursor:pointer;" for="modal-toggle">Menu</label> 
             <label class="modal-backdrop" for="modal-toggle"></label>
             <div class="modal-content" style="border:none;">
                 <label class="modal-close" style="display:none;" for="modal-toggle">&#x2715;</label>
                 <OracMenuControl /> 
             </div>          
-        </div>  
+        </div>
     </div>
 
 @functions {
+    [Parameter] protected EventCallback<bool> OnMenuStateChange { get; set; }
+
+    private bool _showMenu = false;
+    [Parameter] public bool ShowMenu
+    {
+        get => _showMenu;
+        set
+        {
+            if (_showMenu != value)
+            {
+                _showMenu = value;
+                OnMenuStateChange.InvokeAsync(value);
+            }
+        }
+    }
+
     public string ModuleSlot { get; set; } = "Unknown";
 
     public string ModuleName { get; set; } = "Unknown";
@@ -60,14 +76,14 @@
 
     public void OnMessageReceived(object sender, OscMessage msg)
     {
-        if (msg.Address == "/module") 
+        if (msg.Address == "/module")
         {
             var mseg = ((string)msg.Arg[0]).Split(':').Select(_ => _.TrimStart().TrimEnd()).ToArray();
             ModuleSlot = mseg[0]?.ToUpper() ?? "Unknown";
             ModuleName = mseg[1];
             base.Invoke(StateHasChanged);
         }
-        else if (msg.Address == "/page") 
+        else if (msg.Address == "/page")
         {
             var name = (string)msg.Arg[0];
             if (string.IsNullOrWhiteSpace(name)) {
