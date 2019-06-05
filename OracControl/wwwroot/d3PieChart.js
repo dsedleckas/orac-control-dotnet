@@ -4,6 +4,7 @@ window.pieControls.color = d3.scaleOrdinal()
     .domain(['a', 'b'])
     .range(["#007bff", "#ffffff"]);
 
+window.pieControls.innerRadiusCoef = 0.6;
 window.pieControls.angleC = 2.0 / 3.0;
 window.pieControls.pie = d3.pie()
     .sort(null)
@@ -22,7 +23,7 @@ window.pieControls.updateValue = function (ref, value) {
         .data(data_ready, function (d) { return d.data.key; });
 
     var arcGen = d3.arc()
-        .innerRadius(arc.radius * 0.7)
+        .innerRadius(arc.radius * window.pieControls.innerRadiusCoef)
         .outerRadius(arc.radius);
 
     arcs.attr("d", arcGen);
@@ -57,39 +58,54 @@ window.pieControls.init = function (netInstance, ref, radius) {
     var width = radius * 2 + 2 * margin;
     var height = radius + radius * Math.cos(Math.PI * (1 - window.pieControls.angleC)) + 2 * margin;
     const id = '#' + ref;
+    var updateValueByCursor = function (x, y, from) {
+        var r = Math.sqrt(x * x + y * y);
+        var theta = Math.atan(Math.abs(y / x));
+        if (x < 0 && y > 0) { theta = Math.PI - theta; }
+        if (x < 0 && y < 0) { theta = Math.PI + theta; }
+        if (x > 0 && y < 0) { theta = 2 * Math.PI - theta; }
+
+        // change reference point
+        theta = (2 * Math.PI - theta) - (1.5 - window.pieControls.angleC) * Math.PI;
+        if (theta > 2 * Math.PI) { theta = theta - Math.PI * 2; }
+        if (theta < 0) { theta = theta + Math.PI * 2; }
+        if (theta <= window.pieControls.angleC * 2 * Math.PI && r < radius && r > radius * window.pieControls.innerRadiusCoef) {
+            value = theta / (window.pieControls.angleC * 2 * Math.PI);
+            window.pieControls.updateValue(ref, value);
+            netInstance.invokeMethodAsync('UpdateValue', value);
+        };
+    }
+
     var svg = d3.select(id)
         .append("svg")
+        .on('touchstart', function (d, i) {
+            d3.event.preventDefault();
+            d3.event.stopPropagation();
+            var node = d3.select(this).node();
+            var bbox = node.getBBox();
+            var touch = d3.touches(node);
+            var x = touch[0][0] - bbox.x - (bbox.width / 2);
+            var y = -touch[0][1] + bbox.y + radius;
+            updateValueByCursor(x, y);
+        })
+        .on('touchmove', function (d, i) {
+            d3.event.preventDefault();
+            d3.event.stopPropagation();
+            var node = d3.select(this).node();
+            var bbox = node.getBBox();
+            var touch = d3.touches(node);
+            var x = touch[0][0] - bbox.x - (bbox.width / 2);
+            var y = -touch[0][1] + bbox.y + radius;
+            updateValueByCursor(x, y);
+        })
         .on('mousemove', function (d, i) {
             if (d3.event.buttons % 2 === 1) {
                 var node = d3.select(this).node();
                 var bbox = node.getBBox();
                 var mouse = d3.mouse(node);
-
                 var x = mouse[0] - bbox.x - (bbox.width / 2);
                 var y = -mouse[1] + bbox.y + radius;
-
-                var r = Math.sqrt(x * x + y * y);
-                var theta = Math.atan(Math.abs(y / x));
-                if (x < 0 && y > 0) { theta = Math.PI - theta; }
-                if (x < 0 && y < 0) { theta = Math.PI + theta; }
-                if (x > 0 && y < 0) { theta = 2 * Math.PI - theta; }
-                console.log("Before transform: " + theta);
-                // change reference point
-                theta = (2 * Math.PI - theta) - (1.5 - window.pieControls.angleC) * Math.PI;
-                if (theta > 2 * Math.PI) { theta = theta - Math.PI * 2; }
-                if (theta < 0) { theta = theta + Math.PI * 2; }
-                console.log("reference change: " + theta);
-
-                if (theta <= window.pieControls.angleC * 2 * Math.PI && r < radius && r > radius * 0.7) {
-                    console.log(r);
-                    console.log(theta);
-
-                    //var unbounded = 1 - (mouse[1] / (bbox.height + bbox.y * 2));
-                    //var value = Math.min(1, Math.max(0, unbounded));
-                    value = theta / (window.pieControls.angleC * 2 * Math.PI)
-                    window.pieControls.updateValue(ref, value);
-                    netInstance.invokeMethodAsync('UpdateValue', value);
-                }
+                updateValueByCursor(x, y);
             }
         })
         .attr("viewBox", "0 0 160 130")
