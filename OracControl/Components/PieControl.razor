@@ -6,10 +6,9 @@
 @inject IJSRuntime JSRuntime
 @implements IDisposable
 
-<div class="noselect" style="display: inline-block; " id="@GetId"></div>
+<div class="noselect" id="@GetId"></div>
 
 @functions {
-    [Parameter] int Size { get; set; }
 
     [Parameter] string OscAddressReceive { get; set; }
 
@@ -43,7 +42,7 @@
                 "pieControls.init",
                 new DotNetObjectRef(this),
                 GetId,
-                Size);
+                70);
     }
 
     public void Dispose()

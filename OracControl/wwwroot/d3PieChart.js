@@ -33,7 +33,7 @@ window.pieControls.updateValue = function (ref, value) {
         .attr('fill', function (d) { return (window.pieControls.color(d.data.key)); })
         .attr("stroke", "black")
         .style("stroke-width", "2px")
-        .style("opacity", 0.7)
+        .style("opacity", 1)
         .merge(arcs)
         .attr('d', arcGen)
         .each(function (d) { this._current = d; });
@@ -92,8 +92,7 @@ window.pieControls.init = function (netInstance, ref, radius) {
                 }
             }
         })
-        .attr("width", width)
-        .attr("height", height)
+        .attr("viewBox", "0 0 160 130")
         .append("g")
         .attr("transform", "translate(" + width / 2 + "," + (radius + margin) + ")");
     window.pieControls.arcs[id] = { arc: svg, radius: radius, netInstance: netInstance };
