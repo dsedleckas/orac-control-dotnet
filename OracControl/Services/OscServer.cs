@@ -31,7 +31,7 @@ namespace OracControl.Services
             }
             catch (Exception e)
             {
-                Console.WriteLine($"Error reconnecting, try again: {e.Message}");
+                Console.WriteLine($"Error reconnecting, try again: {e.Message} {e.StackTrace}");
             }
         }
 
