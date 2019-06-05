@@ -64,10 +64,32 @@ window.pieControls.init = function (netInstance, ref, radius) {
                 var node = d3.select(this).node();
                 var bbox = node.getBBox();
                 var mouse = d3.mouse(node);
-                var unbounded = 1 - (mouse[1] / (bbox.height + bbox.y * 2));
-                var value = Math.min(1, Math.max(0, unbounded));
-                window.pieControls.updateValue(ref, value);
-                netInstance.invokeMethodAsync('UpdateValue', value);
+
+                var x = mouse[0] - bbox.x - (bbox.width / 2);
+                var y = -mouse[1] + bbox.y + radius;
+
+                var r = Math.sqrt(x * x + y * y);
+                var theta = Math.atan(Math.abs(y / x));
+                if (x < 0 && y > 0) { theta = Math.PI - theta; }
+                if (x < 0 && y < 0) { theta = Math.PI + theta; }
+                if (x > 0 && y < 0) { theta = 2 * Math.PI - theta; }
+                console.log("Before transform: " + theta);
+                // change reference point
+                theta = (2 * Math.PI - theta) - (1.5 - window.pieControls.angleC) * Math.PI;
+                if (theta > 2 * Math.PI) { theta = theta - Math.PI * 2; }
+                if (theta < 0) { theta = theta + Math.PI * 2; }
+                console.log("reference change: " + theta);
+
+                if (theta <= window.pieControls.angleC * 2 * Math.PI && r < radius && r > radius * 0.7) {
+                    console.log(r);
+                    console.log(theta);
+
+                    //var unbounded = 1 - (mouse[1] / (bbox.height + bbox.y * 2));
+                    //var value = Math.min(1, Math.max(0, unbounded));
+                    value = theta / (window.pieControls.angleC * 2 * Math.PI)
+                    window.pieControls.updateValue(ref, value);
+                    netInstance.invokeMethodAsync('UpdateValue', value);
+                }
             }
         })
         .attr("width", width)
