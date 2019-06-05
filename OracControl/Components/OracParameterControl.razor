@@ -4,12 +4,12 @@
 @inject IOscServer server
 @implements IDisposable
 
-    <div class="@DisplayStatus flex-column justify-content-center align-items-center">
-        <div class="d-block d-flex flex-row justify-content-between pb-2" style="width:100%;">
-            <div class="d-inline text-right pl-2">@Description</div>
-            <div class="d-inline text-left pl-1">@Value</div>
+    <div class="@DisplayStatus">
+        <div class="d-flex justify-content-between">
+            <div class="text-uppercase font-weight-bold">@(Description)</div>
+            <div class="text-uppercase font-weight-bold">@(Value)</div>
         </div>
-        <PieControl Size="70" OscAddressReceive="@(Prefix + "Ctrl")" OscAddressSend="@(Prefix + "Ctrl")" />
+        <PieControl OscAddressReceive="@(Prefix + "Ctrl")" OscAddressSend="@(Prefix + "Ctrl")" />
     </div>
 
 @functions {
@@ -65,7 +65,7 @@
 
     private void Enable()
     {
-        DisplayStatus = "d-block d-flex";
+        DisplayStatus = "param-block";
     }
 
     protected override void OnInit()
