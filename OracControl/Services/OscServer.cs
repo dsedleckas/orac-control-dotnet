@@ -74,6 +74,8 @@ namespace OracControl.Services
             SendServerState();
             _sender.Connect();
             SendServerState();
+            _moduleLoaded = false;
+            _menuLoaded = false;
             Send("/Connect", _receiver.Port);
             Send("/ModuleNext", _receiver.Port);
             Send("/ModulePrev", _receiver.Port);

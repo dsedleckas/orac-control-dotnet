@@ -15,7 +15,7 @@
         </div>
         <div class="card @(!IsLoaded ? "d-none" :"")">
             <div class="card-header">
-                <OracModuleControl />
+                <OracModuleControl ShowMenu="@ShowMenu" OnMenuStateChange="@OnMenuStateChange" />
             </div>
             <div class="card-body">
                 <div class="row">
@@ -53,6 +53,14 @@
 @functions {
 
     public bool IsLoaded { get; set; } = false;
+
+    public bool ShowMenu { get; set; } = false;
+
+    public async void OnMenuStateChange(bool value)
+    {
+        ShowMenu = value;
+    }
+
     protected override async Task OnAfterRenderAsync()
     {
         await JSRuntime.InvokeAsync<object>(
@@ -90,7 +98,23 @@
     {
         if(KeyMappings.TryGetValue(keyCode, out var address))
         {
-            server.Send(address, 1);
+            if ((address == "/NavNext" || address == "/NavPrev" || address == "/NavActivate") && !ShowMenu)
+            {
+                ShowMenu = true;
+                base.Invoke(StateHasChanged);
+            }
+            else if (address == "CloseMenu")
+            {
+                if (ShowMenu)
+                {
+                    ShowMenu = false;
+                    base.Invoke(StateHasChanged);
+                }
+            }
+            else
+            {
+                server.Send(address, 1);
+            }
         }
 
         return Task.CompletedTask;
