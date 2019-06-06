@@ -89,3 +89,14 @@ html, body {
     vertical-align: top;
     overflow: hidden;
 }
+
+.param-text {
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    display: block;    
+}
+
+.params-container {
+    padding: .75rem;
+}
