@@ -13,7 +13,6 @@ namespace OracControl
         {
             services.AddRazorPages();
             services.AddServerSideBlazor();
-            services.AddSingleton<IOscServer, OscServer>();
         }
 
         public void Configure(IApplicationBuilder app, IWebHostEnvironment env)
