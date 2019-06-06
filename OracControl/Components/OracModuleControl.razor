@@ -4,7 +4,7 @@
 @inject IConfiguration config
 @implements IDisposable
 
-    <div class="d-flex justify-content-between flex-wrap">
+    <div class="d-flex justify-content-between flex-wrap w-100">
         <div class="p-1 btn-group @(!config.GetValue<bool>("EnableOnScreenNavigationButtons") ? "d-none" : "")" role="group">
             <button onclick="@(() => ModuleChange(PrevModuleAddress))" class="btn btn-outline-secondary" type="button">◄</button>
             <button class="btn btn-outline-secondary" style="width:140px;" type="button">@(ModuleSlot): @(ModuleName)</button>
