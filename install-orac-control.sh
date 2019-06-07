@@ -49,3 +49,4 @@ sudo cp -R app/. $APP_DIR
 sudo install -v -m 644 orac-control.service /usr/lib/systemd/system/
 sudo systemctl daemon-reload
 sudo systemctl enable orac-control.service
+sudo systemctl restart orac-control.service
