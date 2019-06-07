@@ -1,0 +1,14 @@
+{
+    "name": "Orac Control",
+    "short_name": "Orac",
+    "description": "Web Client for Orac 2.0",
+    "icons": [
+        {
+          "src": "/images/512.png",
+          "sizes": "512x512"
+        }
+    ],
+    "display": "fullscreen",
+    "start_url": "/",
+    "orientation": "landscape"
+  }

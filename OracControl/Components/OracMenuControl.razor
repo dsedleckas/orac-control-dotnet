@@ -5,7 +5,7 @@
 @inject IConfiguration  config
 @implements IDisposable
 
-    <div class="card @(!IsLoaded ? "d-none" : "")">
+    <div style="border:none;" class="card @(!IsLoaded ? "d-none" : "")">
         <div class="card-body p-0">
             <ul class="list-group list-group-flush">
                 <OracMenuItem Idx="1" />
@@ -15,7 +15,7 @@
                 <OracMenuItem Idx="5" />
             </ul>
         </div>
-        <div class="card-footer d-flex flex-row justify-content-between">
+        <div class="card-footer d-flex flex-row justify-content-between" style="padding:.5rem;">
             <label class="btn btn-outline-secondary" style="margin-bottom:0;cursor:pointer;" for="modal-toggle">Close</label>
             <div class="btn-group @(config.GetValue<bool>("EnableOnScreenNavigationButtons") ? "" : "d-none")">
                 <button onclick="@(() => Navigation("/NavPrev"))" class="btn btn-outline-secondary" type="button">Up</button>

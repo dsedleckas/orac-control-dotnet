@@ -1,0 +1,14 @@
+[Unit]
+Description=Orac Control Service
+After=mec.service
+Requires=mec.service
+
+[Service]
+User=patch
+Environment=HOME=/home/patch
+Restart=always
+WorkingDirectory=/usr/local/orac-control
+ExecStart=/usr/local/dotnet/dotnet OracControl.dll --urls="http://*:5000"
+
+[Install]
+WantedBy=multi-user.target
