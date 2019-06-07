@@ -129,11 +129,11 @@ namespace OracControl.Services
                         }
                     }
                 }
-                catch (Exception e) when (e.Message != "The receiver socket has been disconnected")
+                catch (Exception e) when (e.Message != "Receiver_SocketIsClosed")
                 {
                     Console.WriteLine($"Error! {e.Message}");
                 }
-                catch (Exception e) when (e.Message == "The receiver socket has been disconnected")
+                catch (Exception e) when (e.Message == "Receiver_SocketIsClosed")
                 {
                 }
             }
