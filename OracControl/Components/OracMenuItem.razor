@@ -10,6 +10,8 @@
 
     public string Label { get; set; } = " ";
 
+    private string _labelRaw { get; set; } = null;
+
     public bool Toggle { get; set; }
 
     public bool Active { get; set; }
@@ -20,6 +22,7 @@
         {
             if (Label != " ")
             {
+                _labelRaw = null;
                 Label = " ";
                 base.Invoke(StateHasChanged);
             }
@@ -31,17 +34,21 @@
             if (idx == Idx)
             {
                 var label = (string)msg.Arg[1];
-                if (label.Contains("[X]"))
+                if (label != _labelRaw)
                 {
-                    Toggle = true;
-                }
-                else
-                {
-                    Toggle = false;
-                }
+                    _labelRaw = label;
+                    if (label.Contains("[X]"))
+                    {
+                        Toggle = true;
+                    }
+                    else
+                    {
+                        Toggle = false;
+                    }
 
-                Label = label.Split("   ", StringSplitOptions.RemoveEmptyEntries).FirstOrDefault() ?? " ";
-                base.Invoke(StateHasChanged);
+                    Label = label.Split("   ", StringSplitOptions.RemoveEmptyEntries).FirstOrDefault() ?? " ";
+                    base.Invoke(StateHasChanged);
+                }
             }
 
         }

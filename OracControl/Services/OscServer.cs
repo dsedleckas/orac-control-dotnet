@@ -26,6 +26,7 @@ namespace OracControl.Services
         {
             try
             {
+                SendServerState("Connecting");
                 ReconnectListener(listenerPort);
                 await ReconnectSender(oracAddress, oracPort);
             }
@@ -37,21 +38,17 @@ namespace OracControl.Services
 
         private void ReconnectListener(int port)
         {
-            SendServerState();
             if (_receiver?.State == OscSocketState.Connected)
             {
                 _receiver.Close();
-                SendServerState();
             }
 
             _receiveTask?.Wait();
-            SendServerState();
             _receiveTask?.Dispose();
             _receiver?.Dispose();
 
             _receiver = new OscReceiver(port);
             _receiver.Connect();
-            SendServerState();
             _receiveTask = Task.Run(async () => await ListenLoop());
         }
 
@@ -60,19 +57,15 @@ namespace OracControl.Services
             while (_receiver.State != OscSocketState.Connected)
             {
                 await Task.Delay(1000);
-                SendServerState();
             }
 
             _sender?.Close();
             _sender = new UDPSender(address, port);
-            SendServerState();
             _moduleLoaded = false;
             _menuLoaded = false;
             Send("/Connect", _receiver.Port);
             Send("/ModuleNext", _receiver.Port);
             Send("/ModulePrev", _receiver.Port);
-
-
         }
 
         public void Send(string address, params object[] args)
@@ -93,7 +86,6 @@ namespace OracControl.Services
             while (_receiver.State != OscSocketState.Connected)
             {
                 await Task.Delay(1000);
-                SendServerState();
             }
 
             while (_receiver.State == OscSocketState.Connected)
@@ -111,7 +103,6 @@ namespace OracControl.Services
                                 Arg = m.ToArray()
                             });
 
-                        SendServerState();
                         var change = false;
                         if (!_moduleLoaded && m.Address == "/module")
                         {
@@ -127,12 +118,14 @@ namespace OracControl.Services
 
                         if (change && _menuLoaded && _moduleLoaded)
                         {
+                            SendServerState("Connected");
                             // Send special message to all of the components that connect has completed
                             OscMessageArrived?.Invoke(this,
                                 new OscMessage
                                 {
                                     Address = "/ConnectComplete"
                                 });
+
                         }
                     }
                 }
@@ -155,13 +148,12 @@ namespace OracControl.Services
             _sender?.Close();
         }
 
-        private void SendServerState()
+        private void SendServerState(string state)
         {
             ServerStateChanged?.Invoke(this,
                 new Services.ServerStateChanged
                 {
-                    ListenerState = _receiver?.State,
-                    SenderState = null
+                    State = state
                 });
         }
     }

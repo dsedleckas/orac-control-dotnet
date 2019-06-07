@@ -4,8 +4,6 @@ namespace OracControl.Services
 {
     public class ServerStateChanged
     {
-        public OscSocketState? SenderState;
-
-        public OscSocketState? ListenerState;
+        public string State { get; set; }
     }
 }

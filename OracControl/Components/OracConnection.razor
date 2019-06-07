@@ -28,8 +28,8 @@
 
         <button onclick="@OnClick" class="btn btn-block mb-3 mx-2 @ConnectActionState" type="button">
             <span>Connect</span>
-            <div class="spinner-grow @UIStatus" role="status">
-                <span class="sr-only">Sender status</span>
+            <div class="spinner-border @(!UIStatusLoading ? "d-none" : "")" role="status">
+                <span class="sr-only">Loading...</span>
             </div>
         </button>
     </div>
@@ -44,7 +44,7 @@
 
     public string ConnectActionState { get; set; } = "btn-outline-secondary";
 
-    public string UIStatus { get; set; } = "text-secondary";
+    public bool UIStatusLoading { get; set; } = false;
 
     private void OnClick()
     {
@@ -61,24 +61,11 @@
 
     private void OnServerStateChange(object sender, ServerStateChanged stateChange)
     {
-        UIStatus = StateToUiText(stateChange.ListenerState, stateChange.SenderState);
-        base.Invoke(StateHasChanged);
-    }
-
-    private string StateToUiText(Rug.Osc.OscSocketState? listenerState, Rug.Osc.OscSocketState? senderState)
-    {
-        if (listenerState == Rug.Osc.OscSocketState.Connected &&
-            senderState == Rug.Osc.OscSocketState.Connected)
+        if ("Connecting" == stateChange.State && !UIStatusLoading)
         {
-            return "text-success";
-
+            UIStatusLoading = true;
+            base.Invoke(StateHasChanged);
         }
-        else if (listenerState == null && senderState == null)
-        {
-            return "text-secondary";
-        }
-
-        return "text-danger";
     }
 
     protected override void OnInit()
